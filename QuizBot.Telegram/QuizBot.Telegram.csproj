@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.2</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\QuizBot.Repository.Contract\QuizBot.Repository.Contract.csproj" />
+      <ProjectReference Include="..\QuizBot.Telegram.Contract\QuizBot.Telegram.Contract.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Telegram.Bot" Version="15.0.0" />
+    </ItemGroup>
+
+</Project>
