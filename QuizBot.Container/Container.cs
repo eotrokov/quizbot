@@ -1,9 +1,14 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using QuizBot.Repository;
 using QuizBot.Repository.Contract;
+using QuizBot.Service;
+using QuizBot.Service.Contract;
 using QuizBot.Telegram;
 using QuizBot.Telegram.Contract;
 
@@ -16,7 +21,7 @@ namespace QuizBot.Container
 
         public static AutofacServiceProvider Instance => lazy.Value._serviceProvider;
 
-        private AutofacServiceProvider _serviceProvider;
+        private readonly AutofacServiceProvider _serviceProvider;
 
         private Container()
         {
@@ -24,8 +29,14 @@ namespace QuizBot.Container
             serviceCollection.AddLogging();
             var containerBuilder = new ContainerBuilder();
             containerBuilder.Populate(serviceCollection);
-            containerBuilder.RegisterType<TelegramClient>().As<ITelegramClient>().SingleInstance();
-            containerBuilder.RegisterType<UserRepository>().As<IUserRepository>().SingleInstance();
+
+            var assemblies = Directory
+                .EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll", SearchOption.TopDirectoryOnly)
+                .Where(filePath => Path.GetFileName(filePath).StartsWith("QuizBot"))
+                .Select(Assembly.LoadFrom)
+                .ToArray();
+            containerBuilder.RegisterAssemblyTypes(assemblies).AsImplementedInterfaces();
+
             var container = containerBuilder.Build();
             _serviceProvider = new AutofacServiceProvider(container);
         }

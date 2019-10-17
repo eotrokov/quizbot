@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
+        <OutputPath>$(SolutionDir)out\</OutputPath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,6 +15,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\QuizBot.Repository\QuizBot.Repository.csproj" />
+      <ProjectReference Include="..\QuizBot.Service\QuizBot.Service.csproj" />
       <ProjectReference Include="..\QuizBot.Telegram\QuizBot.Telegram.csproj" />
     </ItemGroup>
     
