@@ -26,7 +26,7 @@ namespace QuizBot.Telegram
         private static TelegramBotClient _client;
         private readonly IUserService _userService;
         private readonly IQuestionService _questionService;
-        
+
         public TelegramClient(IUserService userService, IQuestionService questionService)
         {
             _userService = userService;
@@ -56,24 +56,39 @@ namespace QuizBot.Telegram
             }
             else
             {
-                var f = user.UserAnswers.LastOrDefault();
-                if (f != null)
+                if (user.UserAnswers.Count == 10)
                 {
-                    Console.WriteLine($"{f}: {message.Text}");
-                }
-
-                var question = Get(user.UserAnswers.Select(c => c.QuestionId).ToList());
-                if (question == null)
-                {
-                    var h = await _client.SendTextMessageAsync(message.Chat.Id, "dct",
+                    await _client.SendTextMessageAsync(message.Chat.Id, "Хватит",
                         replyMarkup: new ReplyKeyboardRemove());
                 }
                 else
                 {
-//                    user.UserAnswers.Add(question.id);
-                    var h = await _client.SendTextMessageAsync(message.Chat.Id, question.title, ParseMode.Markdown,
-                        replyMarkup: question.keyboardMarkup);
-                    _userService.SaveUser(user);
+                    var last = user.UserAnswers.LastOrDefault();
+                    if (last != null)
+                    {
+                        last.Answer = message.Text;
+                        last.Stop = DateTime.UtcNow;
+                        Console.WriteLine($"{last.QuestionId}: {message.Text} {last.Span}");
+                    }
+
+                    var question = Get(user.UserAnswers.Select(c => c.QuestionId).ToList());
+                    if (question == null)
+                    {
+                        var h = await _client.SendTextMessageAsync(message.Chat.Id,
+                            $"все {user.UserAnswers.Sum(c => c.Span?.Milliseconds)}",
+                            replyMarkup: new ReplyKeyboardRemove());
+                    }
+                    else
+                    {
+                        user.UserAnswers.Add(new UserAnswer
+                        {
+                            QuestionId = question.id,
+                            Start = DateTime.UtcNow
+                        });
+                        await _client.SendTextMessageAsync(message.Chat.Id, question.title, ParseMode.Markdown,
+                            replyMarkup: question.keyboardMarkup);
+                        _userService.SaveUser(user);
+                    }
                 }
             }
         }

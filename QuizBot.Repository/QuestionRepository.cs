@@ -7,12 +7,14 @@ namespace QuizBot.Repository
 {
     public class QuestionRepository : IQuestionRepository
     {
-        private IEnumerable<Question> _questions;
+        private readonly IEnumerable<Question> _questions;
 
         public QuestionRepository()
         {
             _questions = new List<Question>()
             {
+                Question.Create(),
+                Question.Create(),
                 Question.Create(),
                 Question.Create(),
                 Question.Create(),
