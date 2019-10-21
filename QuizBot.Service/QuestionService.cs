@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using QuizBot.Model;
 using QuizBot.Repository.Contract;
 using QuizBot.Service.Contract;
@@ -12,9 +14,9 @@ namespace QuizBot.Service
             _questionRepository = questionRepository;
         }
 
-        public Question GetQuestion()
+        public Question GetQuestion(IList<int> q)
         {
-            return _questionRepository.GetQuestion();
+            return _questionRepository.GetQuestion(q);
         }
     }
 }

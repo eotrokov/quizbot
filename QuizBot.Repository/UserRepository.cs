@@ -23,7 +23,16 @@ namespace QuizBot.Repository
 
         public bool SaveUser(User user)
         {
-            _users = _users.Append<User>(user);
+            var old = _users.FirstOrDefault(c => c.Id == user.Id);
+            if (old != null)
+            {
+                old.UserAnswers = user.UserAnswers;
+            }
+            else
+            {
+                _users = _users.Append<User>(user);
+            }
+
             return true;
         }
     }

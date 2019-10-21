@@ -13,36 +13,20 @@ namespace QuizBot.Repository
         {
             _questions = new List<Question>()
             {
-                new Question
-                {
-                    Id = 1,
-                    Title = "***как***",
-                    Answers = new List<Answer>()
-                    {
-                        new Answer
-                        {
-                            Id = 1, Title = "1"
-                        },
-                        new Answer
-                        {
-                            Id = 2, Title = "2"
-                        },
-                        new Answer
-                        {
-                            Id = 3, Title = "3", IsCorrect = true
-                        },
-                        new Answer
-                        {
-                            Id = 4, Title = "4"
-                        }
-                    }
-                }
+                Question.Create(),
+                Question.Create(),
+                Question.Create(),
+                Question.Create(),
+                Question.Create(),
+                Question.Create(),
+                Question.Create(),
+                Question.Create()
             };
         }
 
-        public Question GetQuestion()
+        public Question GetQuestion(IList<int> q)
         {
-            return _questions.First();
+            return _questions.FirstOrDefault(c => !q.Contains(c.Id));
         }
     }
 }

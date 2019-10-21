@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 
 namespace QuizBot.Model
@@ -7,5 +8,7 @@ namespace QuizBot.Model
     {
         public int Id { get; set; }
         public string Name { get; set; }
+
+        public List<UserAnswer> UserAnswers { get; set; } = new List<UserAnswer>();
     }
 }

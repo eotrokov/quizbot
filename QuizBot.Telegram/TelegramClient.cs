@@ -26,8 +26,7 @@ namespace QuizBot.Telegram
         private static TelegramBotClient _client;
         private readonly IUserService _userService;
         private readonly IQuestionService _questionService;
-
-
+        
         public TelegramClient(IUserService userService, IQuestionService questionService)
         {
             _userService = userService;
@@ -47,7 +46,8 @@ namespace QuizBot.Telegram
             var user = _userService.GetUserById(message.From.Id);
             if (user == null)
             {
-                await _client.SendTextMessageAsync(message.Chat.Id, "Новый");
+                await _client.SendTextMessageAsync(message.Chat.Id, "Новый",
+                    replyMarkup: new ReplyKeyboardRemove());
                 _userService.SaveUser(new User
                 {
                     Id = message.From.Id,
@@ -56,19 +56,53 @@ namespace QuizBot.Telegram
             }
             else
             {
-                var (t, keyboardMarkup) = Get();
-                await _client.SendTextMessageAsync(message.Chat.Id, t, ParseMode.Markdown, replyMarkup: keyboardMarkup);
+                var f = user.UserAnswers.LastOrDefault();
+                if (f != null)
+                {
+                    Console.WriteLine($"{f}: {message.Text}");
+                }
+
+                var question = Get(user.UserAnswers.Select(c => c.QuestionId).ToList());
+                if (question == null)
+                {
+                    var h = await _client.SendTextMessageAsync(message.Chat.Id, "dct",
+                        replyMarkup: new ReplyKeyboardRemove());
+                }
+                else
+                {
+//                    user.UserAnswers.Add(question.id);
+                    var h = await _client.SendTextMessageAsync(message.Chat.Id, question.title, ParseMode.Markdown,
+                        replyMarkup: question.keyboardMarkup);
+                    _userService.SaveUser(user);
+                }
             }
         }
 
-        private (string, ReplyKeyboardMarkup) Get()
+        public class MyStruct
         {
-            var question = _questionService.GetQuestion();
+            public int id { get; set; }
+            public string title { get; set; }
+            public ReplyKeyboardMarkup keyboardMarkup { get; set; }
+        }
+
+        private MyStruct Get(List<int> userQuestions)
+        {
+            var question = _questionService.GetQuestion(userQuestions);
+            if (question == null)
+            {
+                return null;
+            }
+
             var answers = SplitList(question.Answers.Select(c => c.Title).ToList(), 2).ToArray();
 
             var buttons = answers.Select(g1 => g1.Select(g2 => new KeyboardButton(g2)));
             var replyMarkup = new ReplyKeyboardMarkup(buttons);
-            return (question.Title, replyMarkup);
+            return new MyStruct
+            {
+                title = question.Title,
+                id = question.Id,
+                keyboardMarkup = replyMarkup
+            };
         }
 
         public static IEnumerable<List<T>> SplitList<T>(List<T> locations, int nSize = 30)
